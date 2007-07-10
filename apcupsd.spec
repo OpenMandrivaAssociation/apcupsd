@@ -1,5 +1,5 @@
 %define	name	apcupsd
-%define	version	3.13.12
+%define	version	3.14.1
 %define	release	%mkrel 1
 %define	_cgibin /var/www/cgi-bin
 %define	_sysconfdir /etc/apcupsd
