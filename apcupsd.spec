@@ -1,6 +1,6 @@
 %define	name	apcupsd
 %define	version	3.14.2
-%define	release	%mkrel 1
+%define	release	%mkrel 2
 %define	_cgibin /var/www/cgi-bin
 %define	_sysconfdir /etc/apcupsd
 %define	_sbindir /sbin
@@ -92,5 +92,3 @@ done
 %{_mandir}/man8/*
 %{_cgibin}/*
 %doc ChangeLog doc/ examples/
-
-
