@@ -19,7 +19,6 @@ Group:		System/Servers
 Requires:	initscripts >= 6.27-5mdk
 Requires(post): rpm-helper
 Requires(preun):rpm-helper
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires:	ncurses-devel gd-devel
 
 %description
