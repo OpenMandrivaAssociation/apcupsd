@@ -4,7 +4,7 @@
 
 Summary:	Power management software for APC UPS hardware
 Name:		apcupsd
-Version:	3.14.5
+Version:	3.14.6
 Release:	%mkrel 1
 License:	GPLv2
 Group:		System/Servers
@@ -18,13 +18,8 @@ Requires(preun):rpm-helper
 Requires:	tcp_wrappers
 Requires:	nail
 BuildRequires:	gd-devel
-BuildRequires:	ghostscript-dvipdf
-BuildRequires:	latex2html
 BuildRequires:	ncurses-devel
-BuildRequires:	netpbm
 BuildRequires:	tcp_wrappers-devel
-BuildRequires:	tetex
-BuildRequires:	tetex-latex
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -64,12 +59,6 @@ find examples -type f | xargs chmod 644
 
 %make VERBOSE=1
 
-# fix docs
-pushd doc/latex
-    make
-popd
-rm -rf html; mv doc/latex/apcupsd html
-
 %install
 rm -rf %{buildroot}
 
@@ -90,14 +79,11 @@ for src in changeme commfailure commok onbattery offbattery; do
     install -m0744 platforms/etc/$src %{buildroot}%{_sysconfdir}/apcupsd/$src
 done
 
-install -m0644 doc/apctest.man %{buildroot}%{_mandir}/man8/apctest.8
-
 %find_lang %{name}
 
 # cleanup
-pushd html
-    rm -f WARNINGS imagename_translations images.aux images.idx \
-    images.log images.out images.pl images.tex internals.pl labels.pl
+pushd doc/manual
+    rm -f *.rst publishdoc Makefile
 popd
 
 %post
@@ -111,7 +97,7 @@ rm -rf %{buildroot}
 
 %files -f %{name}.lang
 %defattr(-,root,root)
-%doc ChangeLog DISCLAIMER Developers ReleaseNotes html examples
+%doc ChangeLog DISCLAIMER Developers ReleaseNotes examples doc/manual
 %{_initrddir}/apcupsd
 %dir %{_sysconfdir}/apcupsd
 %config(noreplace) %{_sysconfdir}/apcupsd/*
@@ -125,3 +111,4 @@ rm -rf %{buildroot}
 %{_cgibin}/upsimage.cgi
 %{_cgibin}/upsstats.cgi
 %{_mandir}/man8/*
+%{_mandir}/man5/apcupsd.conf.5*
