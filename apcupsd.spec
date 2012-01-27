@@ -79,8 +79,6 @@ for src in changeme commfailure commok onbattery offbattery; do
     install -m0744 platforms/etc/$src %{buildroot}%{_sysconfdir}/apcupsd/$src
 done
 
-%find_lang %{name}
-
 # cleanup
 pushd doc/manual
     rm -f *.rst publishdoc Makefile
@@ -95,7 +93,7 @@ popd
 %clean
 rm -rf %{buildroot}
 
-%files -f %{name}.lang
+%files
 %defattr(-,root,root)
 %doc ChangeLog DISCLAIMER Developers ReleaseNotes examples doc/manual
 %{_initrddir}/apcupsd
