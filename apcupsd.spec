@@ -13,7 +13,6 @@ Source0:	http://mesh.dl.sourceforge.net/sourceforge/apcupsd/%{name}-%{version}.t
 Patch0:		apcupsd-3.12.2-usbhiddev.patch
 Patch1:		apcupsd-3.10.16-staleusb.patch
 Patch2:		apcupsd-3.14.4-mdv_conf.diff
-Patch3:		apcupsd-3.14.8-link.patch
 Requires(post): rpm-helper
 Requires(preun):rpm-helper
 Requires:	tcp_wrappers
@@ -21,7 +20,7 @@ Requires:	nail
 BuildRequires:	gd-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	tcp_wrappers-devel
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRequires:	libstdc++-static-devel
 
 %description
 UPS power management under Linux for APCC Products. It allows your
@@ -36,7 +35,6 @@ power failure.
 %patch0 -p0 -b .usbhid
 %patch1 -p1 -b .usbstale
 %patch2 -p0 -b .mdv_conf
-%patch3 -p0 -b .link
 
 # fix attribs
 find examples -type f | xargs chmod 644
