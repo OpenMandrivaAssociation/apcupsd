@@ -5,24 +5,23 @@
 Summary:	Power management software for APC UPS hardware
 Name:		apcupsd
 Version:	3.14.8
-Release:	%mkrel 5
+Release:	5
 License:	GPLv2
 Group:		System/Servers
-URL:		http://sourceforge.net/projects/apcupsd/
+Url:		http://sourceforge.net/projects/apcupsd/
 Source0:	http://mesh.dl.sourceforge.net/sourceforge/apcupsd/%{name}-%{version}.tar.gz
 Patch0:		apcupsd-3.12.2-usbhiddev.patch
 Patch1:		apcupsd-3.10.16-staleusb.patch
 Patch2:		apcupsd-3.14.4-mdv_conf.diff
 Patch3:		apcupsd-3.14.8-link.patch
-Requires(post): rpm-helper
-Requires(preun):rpm-helper
-Requires:	tcp_wrappers
-Requires:	nail
-BuildRequires:	gd-devel
-BuildRequires:	ncurses-devel
-BuildRequires:	tcp_wrappers-devel
+
 BuildRequires:	man
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRequires:	gd-devel
+BuildRequires:	wrap-devel
+BuildRequires:	pkgconfig(ncurses)
+Requires(post,postun):	rpm-helper
+Requires:	nail
+Requires:	tcp_wrappers
 
 %description
 UPS power management under Linux for APCC Products. It allows your
@@ -32,7 +31,6 @@ SmartUPS, and then properly executes a controlled shutdown during an extended
 power failure.
 
 %prep
-
 %setup -q
 %patch0 -p0 -b .usbhid
 %patch1 -p1 -b .usbstale
@@ -46,30 +44,28 @@ find examples -type f | xargs chmod 644
 %serverbuild
 
 %configure2_5x \
-    --sysconfdir=%{_sysconfdir}/apcupsd \
-    --enable-usb \
-    --enable-net \
-    --enable-master-slave \
-    --enable-pthreads \
-    --enable-cgi \
-    --with-cgi-bin=%{_cgibin} \
-    --with-serial-dev= \
-    --with-upstype=usb \
-    --with-halpolicydir=%{_halpolicydir} \
-    --with-upscable=usb \
-    --with-nisip=127.0.0.1 \
-    --with-libwrap
+	--sysconfdir=%{_sysconfdir}/apcupsd \
+	--enable-usb \
+	--enable-net \
+	--enable-master-slave \
+	--enable-pthreads \
+	--enable-cgi \
+	--with-cgi-bin=%{_cgibin} \
+	--with-serial-dev= \
+	--with-upstype=usb \
+	--with-halpolicydir=%{_halpolicydir} \
+	--with-upscable=usb \
+	--with-nisip=127.0.0.1 \
+	--with-libwrap
 
 %make VERBOSE=1
 
 %install
-rm -rf %{buildroot}
-
 install -d %{buildroot}%{_initrddir}
 install -d %{buildroot}%{_cgibin}
 
-#perl -pi -e 's|/etc|\$\%{buildroot}/etc|g' platforms/mandrake/Makefile.in
-perl -pi -e 's|\@/sbin/chkconfig|\#\@/sbin/chkconfig|' platforms/mandrake/Makefile.in
+sed -i -e 's|\@/sbin/chkconfig|\#\@/sbin/chkconfig|' \
+	platforms/mandrake/Makefile.in
 
 %makeinstall_std
 #cgibin=%{buildroot}%{_cgibin}
@@ -93,11 +89,7 @@ popd
 %preun
 %_preun_service apcupsd
 
-%clean
-rm -rf %{buildroot}
-
 %files
-%defattr(-,root,root)
 %doc ChangeLog DISCLAIMER Developers ReleaseNotes examples doc/manual
 %{_initrddir}/apcupsd
 %dir %{_sysconfdir}/apcupsd
