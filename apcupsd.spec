@@ -64,8 +64,8 @@ find examples -type f | xargs chmod 644
 install -d %{buildroot}%{_initrddir}
 install -d %{buildroot}%{_cgibin}
 
-sed -i -e 's|\@/sbin/chkconfig|\#\@/sbin/chkconfig|' \
-	platforms/mandrake/Makefile.in
+#sed -i -e 's|\@/sbin/chkconfig|\#\@/sbin/chkconfig|' \
+#	platforms/mandrake/Makefile.in
 
 %makeinstall_std
 #cgibin=%{buildroot}%{_cgibin}
