@@ -1,0 +1,17 @@
+--- apcupsd-3.14.10/configure.lock	2013-04-28 17:30:15.836090103 -0400
++++ apcupsd-3.14.10/configure	2013-04-28 17:30:57.447040442 -0400
+@@ -12290,13 +12290,7 @@
+ done
+ 
+ # set the default serial port lock director
+-for LOCKDIR in "/var/lock" "/var/spool/locks" "/etc/apcupsd"
+-do
+-   if test -d $LOCKDIR
+-   then
+-      break;
+-   fi
+-done
++LOCKDIR=/run/lock
+ 
+ # set the default PWRFAILDIR
+ PWRFAILDIR=${sysconfdir}
