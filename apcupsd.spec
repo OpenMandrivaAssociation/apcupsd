@@ -5,7 +5,7 @@
 Summary:	Power management software for APC UPS hardware
 Name:		apcupsd
 Version:	3.14.10
-Release:	8
+Release:	9
 License:	GPLv2
 Group:		System/Servers
 URL:		http://sourceforge.net/projects/apcupsd/
