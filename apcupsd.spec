@@ -4,15 +4,12 @@
 
 Summary:	Power management software for APC UPS hardware
 Name:		apcupsd
-Version:	3.14.10
-Release:	10
+Version:	3.14.14
+Release:	1
 License:	GPLv2
 Group:		System/Servers
 URL:		http://sourceforge.net/projects/apcupsd/
 Source0:	http://mesh.dl.sourceforge.net/sourceforge/apcupsd/%{name}-%{version}.tar.gz
-Patch1:		apcupsd-3.10.16-staleusb.patch
-Patch2:		apcupsd-3.14.4-mdv_conf.diff
-Patch3:		apcupsd-3.14.10-link.patch
 Patch4:		apcupsd-3.14.10-lockdir.patch
 Requires(post): rpm-helper
 Requires(preun):rpm-helper
@@ -33,9 +30,6 @@ power failure.
 %prep
 
 %setup -q
-%patch1 -p1 -b .usbstale
-%patch2 -p0 -b .mdv_conf
-%patch3 -p0 -b .link
 %patch4 -p1 -b .lock
 
 # fix attribs

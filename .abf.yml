@@ -1,4 +1,2 @@
-removed_sources:
-  apcupsd-3.14.8.tar.gz: cb7a7b401797e129c92a6b8dc2bf7b193b1d6c72
 sources:
-  apcupsd-3.14.10.tar.gz: 4a3d5591672121f5d761d33307b56f10d33f5b67
+  apcupsd-3.14.14.tar.gz: f027fa141c929371fe860443b6d911ef3a3606fb
