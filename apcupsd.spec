@@ -19,6 +19,8 @@ BuildRequires:	gd-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	tcp_wrappers-devel
 BuildRequires:	libstdc++-devel
+BuildRequires:	rpm-helper
+BuildRequires:	systemd
 
 %description
 UPS power management under Linux for APCC Products. It allows your
