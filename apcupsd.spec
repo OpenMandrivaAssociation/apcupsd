@@ -38,7 +38,7 @@ find examples -type f | xargs chmod 644
 %build
 %serverbuild
 
-%configure2_5x \
+%configure \
     --sysconfdir=%{_sysconfdir}/apcupsd \
     --enable-usb \
     --enable-net \
