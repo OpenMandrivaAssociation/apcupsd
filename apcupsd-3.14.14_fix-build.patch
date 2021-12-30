@@ -1,0 +1,12 @@
+--- a/src/gapcmon/gapcmon.c
++++ b/src/gapcmon/gapcmon.c
+@@ -2889,7 +2889,7 @@
+ 
+    pch = g_strdup_printf("%s(%s) emsg=%s", pch_func, pch_topic, pch_emsg);
+ 
+-   g_message(pch);
++   g_message("%s", pch);
+ 
+    g_free(pch);
+ 
+
