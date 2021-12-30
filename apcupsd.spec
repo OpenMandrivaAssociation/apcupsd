@@ -46,7 +46,7 @@ Requires:	nail
 Requires:	tcp_wrappers
 Requires:	util-linux
 # cgi
-Requires:	httpd
+Requires:	webserver
 
 %description
 UPS power management under Linux for APC Products. It allows your
@@ -80,8 +80,8 @@ power failure.
 #----------------------------------------------------------------------------
 
 %package gui
-Summary:      GUI interface for apcupsd
-Requires:     apcupsd = %{version}-%{release}
+Summary:	GUI interface for apcupsd
+Requires:	apcupsd = %{version}-%{release}
 
 %description gui
 UPS power management under Linux for APCC Products. It allows your
@@ -172,3 +172,4 @@ popd
 
 %postun
 %systemd_postun_with_restart apcupsd.service
+
