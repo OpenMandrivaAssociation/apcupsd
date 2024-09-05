@@ -1,175 +1,158 @@
-%define _halpolicydir %{_datadir}/hal/fdi/policy/20thirdparty
-%define	_cgibin /var/www/cgi-bin
-%define	_sbindir /sbin
+# A change in RPM 4.15 causes the make_build macro to misbuild this package.
+# See https://github.com/rpm-software-management/rpm/issues/798
+%global _make_verbose %nil
 
-%global optflags %{optflags} -I%{_includedir}/libusb-1.0
-%global LDFLAGS %{__global_ldflags} -lusb-1.0
+Name:       apcupsd
+Version:    3.14.14
+Release:    5
+Summary:    APC UPS Power Control Daemon
 
-Summary:	Power management software for APC UPS hardware
-Name:		apcupsd
-Version:	3.14.14
-Release:	4
-License:	GPLv2
-Group:		System/Servers
-URL:		https://sourceforge.net/projects/apcupsd/
-Source0:	https://download.sourceforge.net/sourceforge/apcupsd/%{name}-%{version}.tar.gz
-# (fedora)
-Source1:	apcupsd.service
-Source2:	apcupsd_shutdown
-Source3:	apcupsd-httpd.conf
-Source4:	apcupsd.logrotate
+# Automatically converted from old format: GPLv2 - review is highly recommended.
+License:    GPL-2.0-only
+URL:        http://www.apcupsd.com
+Source0:    https://downloads.sourceforge.net/apcupsd/apcupsd-%version.tar.gz
+Source1:    apcupsd.service
+Source2:    apcupsd_shutdown
+Source3:    apcupsd-httpd.conf
+Source4:    apcupsd.logrotate
+Source5:    apcupsd64x64.png
 
-Patch0:		apcupsd-3.14.10-lockdir.patch
-Patch1:		apcupsd-3.14.14_fix-build.patch
-# (fedora)
-Patch2:		apcupsd-3.14.4-shutdown.patch
+# fix crash in gui, rhbz#578276
+Patch0:       apcupsd-3.14.9-fixgui.patch
+# Halt without powering off, rhbz#1442577
+Patch1:       apcupsd-3.14.4-shutdown.patch
+# Fix format-security error so we can enable the checks
+Patch2:       patch-format-security
 
-BuildRequires:	glibc-devel
-BuildRequires:	net-snmp-devel
-BuildRequires:	pkgconfig(gconf-2.0)
-BuildRequires:	pkgconfig(gdlib)
-BuildRequires:	pkgconfig(glib-2.0)
-BuildRequires:	pkgconfig(gthread-2.0)
-BuildRequires:	pkgconfig(gtk+-2.0)
-BuildRequires:	pkgconfig(libusb-1.0)
-BuildRequires:	pkgconfig(ncurses)
-BuildRequires:	nail
-BuildRequires:	tcp_wrappers-devel
-BuildRequires:	systemd
+BuildRequires: net-snmp-devel
+BuildRequires: pkgconfig(gconf-2.0)
+BuildRequires: pkgconfig(gdlib)
+BuildRequires: pkgconfig(glib-2.0)
+BuildRequires: pkgconfig(gthread-2.0)
+BuildRequires: pkgconfig(gtk+-2.0)
+BuildRequires: pkgconfig(libusb-1.0)
+BuildRequires: pkgconfig(ncurses)
+BuildRequires: nail
+BuildRequires: tcp_wrappers-devel
+BuildRequires: systemd
 # docs
-BuildRequires:	python3dist(docutils)
-
-Requires(post): rpm-helper
-Requires(preun):rpm-helper
-
-Requires:	nail
-Requires:	tcp_wrappers
-Requires:	util-linux
-# cgi
-Requires:	webserver
+BuildRequires: python3dist(docutils)
 
 %description
-UPS power management under Linux for APC Products. It allows your
-computer/server to run during power problems for a specified length of time or
-the life of the batteries in your BackUPS, BackUPS Pro, SmartUPS v/s, or
-SmartUPS, and then properly executes a controlled shutdown during an extended
-power failure.
+Apcupsd can be used for controlling most APC UPSes. During a
+power failure, apcupsd will inform the users about the power
+failure and that a shutdown may occur.  If power is not restored,
+a system shutdown will follow when the battery is exausted, a
+timeout (seconds) expires, or the battery runtime expires based
+on internal APC calculations determined by power consumption
+rates.  If the power is restored before one of the above shutdown
+conditions is met, apcupsd will inform users about this fact.
+Some features depend on what UPS model you have (simple or smart).
+
+
+%package cgi
+Summary:      Web interface for apcupsd
+Requires:     %{name} = %{EVRD}
+
+%description cgi
+A CGI interface to the APC UPS monitoring daemon.
+
+
+%package gui
+Summary:      GUI interface for apcupsd
+Requires:     %{name} = %{EVRD}
+
+%description gui
+A GUI interface to the APC UPS monitoring daemon.
+
+%prep
+%autosetup -p1
+
+# Override the provided platform makefile
+printf 'install:\n\techo skipped\n' > platforms/redhat/Makefile
+
+%build
+%configure \
+        --sysconfdir="%{_sysconfdir}/apcupsd" \
+        --with-cgi-bin="/srv/www/apcupsd" \
+        --sbindir=%{_bindir} \
+        --enable-cgi \
+        --enable-pthreads \
+        --enable-net \
+        --enable-apcsmart \
+        --enable-dumb \
+        --enable-net-snmp \
+        --enable-snmp \
+        --enable-usb \
+        --enable-modbus-usb \
+        --enable-gapcmon \
+        --enable-pcnet \
+        --with-serial-dev= \
+        --with-upstype=usb \
+        --with-upscable=usb \
+        --with-lock-dir=%{_localstatedir}/lock \
+        APCUPSD_MAIL=%{_bindir}/mail
+%make_build
+
+%install
+mkdir -p %buildroot/srv/www/apcupsd
+%make_install
+install -m744 platforms/apccontrol \
+              %buildroot%{_sysconfdir}/apcupsd/apccontrol
+
+install -p -D -m0644 %SOURCE1 %buildroot%{_prefix}/lib/systemd/system/apcupsd.service
+install -p -D -m0755 %SOURCE2 %buildroot%{_prefix}/lib/systemd/system-shutdown/apcupsd_shutdown
+install -p -D -m0644 %SOURCE3 %buildroot%{_sysconfdir}/httpd/conf.d/apcupsd.conf
+install -p -D -m0644 %SOURCE4 %buildroot%{_sysconfdir}/logrotate.d/apcupsd
+install -p -D -m0644 %SOURCE5 %buildroot%{_datadir}/pixmaps/apcupsd64x64.png
+
+desktop-file-install \
+        --vendor="openmandriva" \
+        --dir=%buildroot%{_datadir}/applications \
+        --set-icon=apcupsd64x64 \
+        --delete-original \
+        %buildroot%{_datadir}/applications/gapcmon.desktop
+
+# Cleanup for later %%doc processing
+chmod -x examples/*.c
+rm examples/*.in
+
+# Drop old sysv bits
+rm -rf %{buildroot}%{_sysconfdir}/rc.d
 
 %files
 %license COPYING
-%doc ChangeLog DISCLAIMER Developers ReleaseNotes examples doc/manual
-%{_initrddir}/apcupsd
+%doc ChangeLog examples ReleaseNotes
 %dir %{_sysconfdir}/apcupsd
-/lib/systemd/system/apcupsd.service
-/lib/systemd/system-shutdown/apcupsd_shutdown
-%config(noreplace) %{_sysconfdir}/apcupsd/*
+%{_prefix}/lib/systemd/system/apcupsd.service
+%{_prefix}/lib/systemd/system-shutdown/apcupsd_shutdown
+%config(noreplace) %{_sysconfdir}/apcupsd/apcupsd.conf
+%attr(0755,root,root) %{_sysconfdir}/apcupsd/apccontrol
+%config(noreplace) %{_sysconfdir}/apcupsd/changeme
+%config(noreplace) %{_sysconfdir}/apcupsd/commfailure
+%config(noreplace) %{_sysconfdir}/apcupsd/commok
+%config(noreplace) %{_sysconfdir}/apcupsd/offbattery
+%config(noreplace) %{_sysconfdir}/apcupsd/onbattery
 %config(noreplace) %{_sysconfdir}/logrotate.d/apcupsd
+%{_datadir}/hal/fdi/policy/20thirdparty/80-apcupsd-ups-policy.fdi
+%{_bindir}/apc*
+%{_bindir}/smtp
+%{_mandir}/*/*
+
+%files cgi
+%config(noreplace) %{_sysconfdir}/apcupsd/apcupsd.css
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/apcupsd.conf
-%{_halpolicydir}/80-apcupsd-ups-policy.fdi
-%{_sbindir}/apcaccess
-%{_sbindir}/apctest
-%{_sbindir}/apcupsd
-%{_sbindir}/smtp
-%{_cgibin}/multimon.cgi
-%{_cgibin}/upsfstats.cgi
-%{_cgibin}/upsimage.cgi
-%{_cgibin}/upsstats.cgi
-%{_mandir}/man8/*
-%{_mandir}/man5/apcupsd.conf.5*
+%config(noreplace) %{_sysconfdir}/apcupsd/hosts.conf
+%config(noreplace) %{_sysconfdir}/apcupsd/multimon.conf
+/srv/www/apcupsd/
 
-#----------------------------------------------------------------------------
-
-%package gui
-Summary:	GUI interface for apcupsd
-Requires:	apcupsd = %{version}-%{release}
-
-%description gui
-UPS power management under Linux for APCC Products. It allows your
-computer/server to run during power problems for a specified length of time or
-the life of the batteries in your BackUPS, BackUPS Pro, SmartUPS v/s, or
-SmartUPS, and then properly executes a controlled shutdown during an extended
-power failure.
-
-This package provides a GUI interface to the APC UPS monitoring daemon.
-
-%files gui	
+%files gui
 %{_bindir}/gapcmon
 %{_datadir}/applications/*gapcmon.desktop
 %{_datadir}/pixmaps/apcupsd.png
+%{_datadir}/pixmaps/apcupsd64x64.png
 %{_datadir}/pixmaps/charging.png
 %{_datadir}/pixmaps/gapc_prefs.png
 %{_datadir}/pixmaps/onbatt.png
 %{_datadir}/pixmaps/online.png
 %{_datadir}/pixmaps/unplugged.png
-
-#----------------------------------------------------------------------------
-
-%prep
-%autosetup -p1
-
-# fix attribs
-find examples -type f | xargs chmod 644
-
-%build
-%configure \
-	--sysconfdir=%{_sysconfdir}/apcupsd \
-	--enable-apcsmart \
-	--enable-cgi \
-	--enable-dumb \
-	--enable-gapcmon \
-	--enable-master-slave \
-	--enable-modbus \
-	--enable-no-modbus-usb \
-	--enable-net \
-	--enable-pcnet \
-	--enable-pthreads \
-	--enable-snmp \
-	--enable-test \
-	--enable-usb \
-	--with-cgi-bin=%{_cgibin} \
-	--with-halpolicydir=%{_halpolicydir} \
-	--with-libwrap \
-	--with-lock-dir=/var/lock \
-	--with-nisip=127.0.0.1 \
-	--with-serial-dev= \
-	--with-upscable=usb \
-	--with-upstype=usb \
-	%{nil}
-%make_build V=
-
-%install
-install -d %{buildroot}%{_cgibin}
-
-%make_install
-install -m0755 platforms/apccontrol %{buildroot}%{_sysconfdir}/apcupsd/
-install -m0644 platforms/etc/apcupsd.conf %{buildroot}%{_sysconfdir}/apcupsd/
-install -m0755 platforms/mandrake/apcupsd %{buildroot}%{_initrddir}/
-
-for src in changeme commfailure commok onbattery offbattery; do
-	install -m0744 platforms/etc/$src %{buildroot}%{_sysconfdir}/apcupsd/$src
-done
-
-# systemd
-install -p -D -m0644 %SOURCE1 %buildroot/lib/systemd/system/apcupsd.service
-install -p -D -m0755 %SOURCE2 %buildroot/lib/systemd/system-shutdown/apcupsd_shutdown
-
-# cgi
-install -p -D -m0644 %SOURCE3 %buildroot/%{_sysconfdir}/httpd/conf.d/apcupsd.conf
-
-# logrotate
-install -p -D -m0644 %SOURCE4 %buildroot/%{_sysconfdir}/logrotate.d/apcupsd
-
-# cleanup
-pushd doc/manual
-	rm -f *.rst publishdoc Makefile
-popd
-
-%post
-%systemd_post apcupsd.service
-	
-%preun
-%systemd_preun apcupsd.service
-
-%postun
-%systemd_postun_with_restart apcupsd.service
-
