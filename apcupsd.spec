@@ -9,7 +9,7 @@ Summary:    APC UPS Power Control Daemon
 
 # Automatically converted from old format: GPLv2 - review is highly recommended.
 License:    GPL-2.0-only
-URL:        http://www.apcupsd.com
+URL:        https://www.apcupsd.com
 Source0:    https://downloads.sourceforge.net/apcupsd/apcupsd-%version.tar.gz
 Source1:    apcupsd.service
 Source2:    apcupsd_shutdown
