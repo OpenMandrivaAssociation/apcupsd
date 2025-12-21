@@ -24,6 +24,11 @@ Patch1:       apcupsd-3.14.4-shutdown.patch
 # Fix format-security error so we can enable the checks
 Patch2:       patch-format-security
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires: net-snmp-devel
 BuildRequires: pkgconfig(gconf-2.0)
 BuildRequires: pkgconfig(gdlib)
